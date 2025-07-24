@@ -1,0 +1,185 @@
+// src/ProjectX.cpp
+
+#include "ProjectList.h"
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <sstream>
+
+void displayMainMenu() {
+    std::cout << "\n===== Project X =====\n";
+    std::cout << "1. Create new project list\n";
+    std::cout << "2. View all project lists\n";
+    std::cout << "3. Manage a project list\n";
+    std::cout << "4. Exit\n";
+    std::cout << "Choice: ";
+}
+
+void displayProjectMenu(const std::string& name) {
+    std::cout << "\n--- Project: " << name << "---\n";
+    std::cout << "1. Add task\n";
+    std::cout << "2. View tasks\n";
+    std::cout << "3. Mark task complete\n";
+    std::cout << "4. Delete task\n";
+    std::cout << "5. Back to main menu\n";
+    std::cout << "Choice: ";
+}
+
+void saveToFile(const std::vector<ProjectList>& projects) {
+    std::ofstream out("data/savefile.txt");
+    if (!out) {
+        std::cerr << "Failed to open save file.\n";
+        return;
+    }
+
+    for (const ProjectList& project : projects) {
+        out << "[Project] " << project.getName() << "\n";
+        for (const Task& task : project.getTasks()) {
+            out << "[Task] "
+            << task.getTitle() << " | "
+            << task.getDescription() << " | "
+            << (task.isCompleted() ? 1 : 0) << "\n";
+        }
+    }
+
+    out.close();
+    std::cout << "Data saved successfully.\n";
+}
+
+void loadFromFile(std::vector<ProjectList>& projects) {
+    std::ifstream in("data/savefile.txt");
+    if (!in) {
+        std::cerr << "No save file found. Starting fresh.\n";
+        return;
+    }
+
+    std::string line;
+    ProjectList* currentProject = nullptr;
+
+    while (std::getline(in, line)) {
+        if (line.rfind("[Project]", 0) == 0) {
+            std::string projectName = line.substr(10);
+            projects.emplace_back(projectName);
+            currentProject = &projects.back();
+        }
+        else if (line.rfind("[Task]", 0) == 0 && currentProject) {
+            std::string taskData = line.substr(7);
+            std::stringstream ss(taskData);
+            std::string title, description, completeStr;
+
+            std::getline(ss, title, '|');
+            std::getline(ss, description, '|');
+            std::getline(ss, completeStr);
+
+            auto trim = [](std::string& s) {
+                s.erase(0, s.find_first_not_of(" \t"));
+                s.erase(s.find_last_not_of(" \t") + 1);
+            };
+
+            trim(title);
+            trim(description);
+            trim(completeStr);
+
+            currentProject->addTask(title, description);
+            if (completeStr == "1") {
+                currentProject->markTaskComplete(currentProject->getTasks().size());
+            }
+        }
+    }
+
+    in.close();
+    std::cout << "Data loaded successfully.\n";
+}
+
+int main() {
+    std::vector<ProjectList> projects;
+    int mainChoice;
+
+    while (true) {
+        displayMainMenu();
+        std::cin >> mainChoice;
+        std::cin.ignore();
+
+        if (mainChoice == 1) {
+            std::string name;
+            std::cout << "Enter project name: ";
+            std::getline(std::cin, name);
+            projects.emplace_back(name);
+            std::cout << "Project \"" << name << "\" created!\n";
+        }
+        else if (mainChoice == 2) {
+            if (projects.empty()) {
+                std::cout << "No projects created yet.\n";
+                continue;
+            }
+            for (size_t i=0; i < projects.size(); ++i)
+            std::cout << i + 1 << ". " << projects[i].getName() << "\n";
+        }
+        else if (mainChoice == 3) {
+            if (projects.empty()) {
+                std::cout << "No projects available.\n";
+                continue;
+            }
+
+            int index;
+            std::cout << "Enter project number to manage: ";
+            std::cin >> index;
+            std::cin.ignore();
+
+            if (index < 1 || index > projects.size()) {
+                std::cout << "Invalid index.\n";
+                continue;
+            }
+
+            ProjectList& current = projects[index - 1];
+            int subChoice;
+
+            while (true) {
+                displayProjectMenu(current.getName());
+                std::cin >> subChoice;
+                std::cin.ignore();
+
+                if (subChoice == 1) {
+                    std::string title, desc;
+                    std::cout << "Enter task title: ";
+                    std::getline(std::cin, title);
+                    std::cout << "Enter task description: ";
+                    std::getline(std::cin, desc);
+                    current.addTask(title, desc);
+                }
+                else if (subChoice == 2) {
+                    current.viewTasks();
+                }
+                else if (subChoice == 3) {
+                    int tIndex;
+                    std::cout << "Enter task number to mark complete: ";
+                    std::cin >> tIndex;
+                    std::cin.ignore();
+                    current.markTaskComplete(tIndex);
+                }
+                else if (subChoice == 4) {
+                    int tIndex;
+                    std::cout << "Enter task number to delete: ";
+                    std::cin >> tIndex;
+                    std::cin.ignore();
+                    current.deleteTask(tIndex);
+                }
+                else if (subChoice == 5) {
+                    break;
+                }
+                else {
+                    std::cout << "Invalid choice.\n";
+                }
+            }
+        }
+        else if (mainChoice == 4) {
+            std::cout << "Goodbye!\n";
+            break;
+        }
+    else {
+        std::cout << "Invalid choice.\n";
+    }
+
+    return 0;
+}

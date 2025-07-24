@@ -22,6 +22,8 @@ public:
     void viewTasks() const;
     void markTaskComplete(int index);
     void deleteTask(int index);
+
+    std::vector<Task> getTasks() const;
 };
 
 #endif 
