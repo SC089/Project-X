@@ -37,3 +37,7 @@ void ProjectList::deleteTask(int index) {
     }
     tasks.erase(tasks.begin() + (index - 1));
 }
+
+std::vector<Task> ProjectList::getTasks() const {
+    return tasks;
+}
