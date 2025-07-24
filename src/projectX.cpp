@@ -114,6 +114,7 @@ void runProjectMenu(ProjectList& current, std::vector<ProjectList>& projects) {
             // Nothing is physically changed so an autosave feature is not needed
         }
         else if (subChoice == 3) {
+            current.viewTasks();
             int tIndex;
             std::cout << "Enter task number to mark complete: ";
             std::cin >> tIndex;
@@ -122,6 +123,7 @@ void runProjectMenu(ProjectList& current, std::vector<ProjectList>& projects) {
             saveToFile(projects); // Autosave
         }
         else if (subChoice == 4) {
+            current.viewTasks();
             int tIndex;
             std::cout << "Enter task number to delete: ";
             std::cin >> tIndex;
@@ -162,6 +164,7 @@ int main() {
                 std::cout << "No projects created yet.\n";
                 continue;
             }
+            std::cout << "\n=== Current Projects ===\n";
             for (size_t i = 0; i < projects.size(); ++i)
                 std::cout << i + 1 << ". " << projects[i].getName() << "\n";
         }
@@ -170,6 +173,10 @@ int main() {
                 std::cout << "No projects available.\n";
                 continue;
             }
+            
+            std::cout << "\nAvailable Projects:\n";
+            for (size_t i = 0; i < projects.size(); ++i)
+                std::cout << i + 1 << ". " << projects[i].getName() << "\n";
 
             int index;
             std::cout << "Enter project number to manage: ";
