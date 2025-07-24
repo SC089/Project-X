@@ -174,7 +174,6 @@ int main() {
                 continue;
             }
             
-
             std::cout << "\nAvailable Projects:\n";
             for (size_t i = 0; i < projects.size(); ++i)
                 std::cout << i + 1 << ". " << projects[i].getName() << "\n";
