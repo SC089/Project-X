@@ -92,8 +92,55 @@ void loadFromFile(std::vector<ProjectList>& projects) {
     std::cout << "Data loaded successfully.\n";
 }
 
+// Made new reusable submenu logic to allow looping back into main menu instead of simply breaking and crashing the program
+void runProjectMenu(ProjectList& current, std::vector<ProjectList>& projects) {
+    int subChoice;
+    while (true) {
+        displayProjectMenu(current.getName());
+        std::cin >> subChoice;
+        std::cin.ignore();
+
+        if (subChoice == 1) {
+            std::string title, desc;
+            std::cout << "Enter task title: ";
+            std::getline(std::cin, title);
+            std::cout << "Enter task description: ";
+            std::getline(std::cin, desc);
+            current.addTask(title, desc);
+            saveToFile(projects); // Autosave
+        }
+        else if (subChoice == 2) {
+            current.viewTasks();
+            // Nothing is physically changed so an autosave feature is not needed
+        }
+        else if (subChoice == 3) {
+            int tIndex;
+            std::cout << "Enter task number to mark complete: ";
+            std::cin >> tIndex;
+            std::cin.ignore();
+            current.markTaskComplete(tIndex);
+            saveToFile(projects); // Autosave
+        }
+        else if (subChoice == 4) {
+            int tIndex;
+            std::cout << "Enter task number to delete: ";
+            std::cin >> tIndex;
+            std::cin.ignore();
+            current.deleteTask(tIndex);
+            saveToFile(projects); // Autosave
+        }
+        else if (subChoice == 5) {
+            break; // returns to main menu
+        }
+        else {
+            std::cout << "Invalid choice.\n";
+        }
+    }
+}
+
 int main() {
     std::vector<ProjectList> projects;
+    loadFromFile(projects); // Load saved projects
     int mainChoice;
 
     while (true) {
@@ -107,14 +154,16 @@ int main() {
             std::getline(std::cin, name);
             projects.emplace_back(name);
             std::cout << "Project \"" << name << "\" created!\n";
+
+            runProjectMenu(projects.back(), projects);      // submenu for new project, removed saveToFile inside choice 1 because the subMenu now has built in autosaves
         }
         else if (mainChoice == 2) {
             if (projects.empty()) {
                 std::cout << "No projects created yet.\n";
                 continue;
             }
-            for (size_t i=0; i < projects.size(); ++i)
-            std::cout << i + 1 << ". " << projects[i].getName() << "\n";
+            for (size_t i = 0; i < projects.size(); ++i)
+                std::cout << i + 1 << ". " << projects[i].getName() << "\n";
         }
         else if (mainChoice == 3) {
             if (projects.empty()) {
@@ -132,53 +181,17 @@ int main() {
                 continue;
             }
 
-            ProjectList& current = projects[index - 1];
-            int subChoice;
-
-            while (true) {
-                displayProjectMenu(current.getName());
-                std::cin >> subChoice;
-                std::cin.ignore();
-
-                if (subChoice == 1) {
-                    std::string title, desc;
-                    std::cout << "Enter task title: ";
-                    std::getline(std::cin, title);
-                    std::cout << "Enter task description: ";
-                    std::getline(std::cin, desc);
-                    current.addTask(title, desc);
-                }
-                else if (subChoice == 2) {
-                    current.viewTasks();
-                }
-                else if (subChoice == 3) {
-                    int tIndex;
-                    std::cout << "Enter task number to mark complete: ";
-                    std::cin >> tIndex;
-                    std::cin.ignore();
-                    current.markTaskComplete(tIndex);
-                }
-                else if (subChoice == 4) {
-                    int tIndex;
-                    std::cout << "Enter task number to delete: ";
-                    std::cin >> tIndex;
-                    std::cin.ignore();
-                    current.deleteTask(tIndex);
-                }
-                else if (subChoice == 5) {
-                    break;
-                }
-                else {
-                    std::cout << "Invalid choice.\n";
-                }
-            }
+            runProjectMenu(projects[index - 1], projects);  // submenu for existing project
+            saveToFile(projects);                 // save after changes
         }
         else if (mainChoice == 4) {
+            saveToFile(projects);
             std::cout << "Goodbye!\n";
             break;
         }
-    else {
-        std::cout << "Invalid choice.\n";
+        else {
+            std::cout << "Invalid choice.\n";
+        }
     }
 
     return 0;
