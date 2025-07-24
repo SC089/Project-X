@@ -12,7 +12,8 @@ void displayMainMenu() {
     std::cout << "1. Create new project list\n";
     std::cout << "2. View all project lists\n";
     std::cout << "3. Manage a project list\n";
-    std::cout << "4. Exit\n";
+    std::cout << "4. Delete a project list\n";
+    std::cout << "5. Exit\n";
     std::cout << "Choice: ";
 }
 
@@ -192,6 +193,30 @@ int main() {
             saveToFile(projects);                 // save after changes
         }
         else if (mainChoice == 4) {
+            if (projects.empty()) {
+                std::cout << "No projects available to delete.\n";
+                continue;
+            }
+
+            std::cout << "\nWhich project would you like to delete?\n";
+            for (size_t i = 0; i < projects.size(); ++i)
+                std::cout << i + 1 << ". " << projects[i].getName() << "\n";
+
+            int delIndex;
+            std::cout << "Enter project number to delete: ";
+            std::cin >> delIndex;
+            std::cin.ignore();
+
+            if (delIndex < 1 || delIndex > projects.size()) {
+                std::cout << "Invalid index.\n";
+                continue;
+            }
+
+            std::cout << "Deleted project: " << projects[delIndex - 1].getName() << "\n";
+            projects.erase(projects.begin() + (delIndex - 1));
+            saveToFile(projects);
+        }
+        else if (mainChoice == 5) {
             saveToFile(projects);
             std::cout << "Goodbye!\n";
             break;
