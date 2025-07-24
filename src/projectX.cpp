@@ -173,6 +173,7 @@ int main() {
                 std::cout << "No projects available.\n";
                 continue;
             }
+            
 
             std::cout << "\nAvailable Projects:\n";
             for (size_t i = 0; i < projects.size(); ++i)
